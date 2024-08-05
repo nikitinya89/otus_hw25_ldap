@@ -96,7 +96,7 @@ iptables -A INPUT -p tcp --dport 123 -j ACCEPT
 iptables -A INPUT -p udp --dport 123 -j ACCEPT
 iptables -P INPUT DROP
 ```
-После настройки iptables примет слеюущий вид:  
+После настройки _iptables_ примет слеюущий вид:  
 
 ![iptables](img/iptables.jpg)
   
