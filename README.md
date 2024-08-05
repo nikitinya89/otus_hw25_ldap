@@ -67,3 +67,31 @@ echo "Qwerty123" | ipa user-add "user" --first="Otus" --last="Test" --shell="/bi
 
 После этого можем авторизовываться на сервервах домена по SSH-ключам.  
 ### Настройка файерволла
+Для работы LDAP необходимо открыть следующие порты:
+|Номер порта|Протокол|Название службы|
+|-|-|-|
+|53|tcp/udp|DNS|
+|80, 443|tcp|HTTP/HTTPS|
+|389, 636|tcp|LDAP/LDPAS|
+|88, 464|tcp/udp|Kerberos|
+|123|tcp/udp|NTP|
+
+Помимо этого разрешим весь трафик для интерфейса _loopback_, _established related_ соединения, _ICMP_, а также _SSH_. 
+Настроим эти правила с помощью **iptables**. После настройки установим политику по умолчанию _DROP_:
+```bash
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 53 -j ACCEPT
+iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 80 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 443 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 389 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 636 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 88 -j ACCEPT
+iptables -A OUTPUT -p udp --dport 88 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 464 -j ACCEPT
+iptables -A OUTPUT -p udp --dport 464 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 123 -j ACCEPT
+iptables -A OUTPUT -p udp --dport 123 -j ACCEPT
+```
