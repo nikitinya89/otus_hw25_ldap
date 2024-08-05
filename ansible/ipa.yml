@@ -1,0 +1,139 @@
+---
+- name: Configure FreeIPA
+  hosts: all
+  become: true
+  vars:
+    ipa_server: "ipa.otus.lan"
+    domain: "otus.lan"
+    realm: "OTUS.LAN"
+    admin_account: "admin"
+    admin_password: "Qwerty123"
+    netbios: "OTUS"
+    user_account: "user"
+    user_password: "secret"
+    user_first: "Otus"
+    user_last: "Test"
+    user_shell: "/bin/bash"
+    pub_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCo4USOCaAsSsaDuQA2kdTLFtIvdxRVHqLGLAMbCqnEtJkrepdizeqgYKKChGVXGeCa+SlbCowHXkqagXk/oISL8gswOYl/bk4WZsXGHOXjPyxNOOt3TWepVF5kU73pZO9zv+ZwoDQCXTqolTA739ie3O1MhgQtzj8i081Q9ZqBEwNO5ZRlLmbNHuDcFV9opTrbqgSVqTC9f+rctaVIZCTFQfNnQ2VFBoB2i2pAwSSVfJUFEYgpAQjw9txTxXO+t5ikf+VbFmzk0Wb8VJF8XWOK/vAzYmj6APwL7t0yQ8fQg1CCMIL9TDkXLN8Fcd8Oqfzl2j1bL/bdyjFb+j0tLOU/P4lptCCLuzmtqLxg/XH4Thc7NidxfcaB6kpaXOXu8Bja/6ZftxjRIDzlm9D7z+kkfRM/58g4UEk3rfbOJW2thmXZlaf1b5bio/d50iYFkEIImmztPHeG6nM6ySge9BQa39JZcYrzpuLPHo5E/hdFwIqLaFpx/91h/swoWWzBnmM= root@ipa.otus.lan"
+
+  tasks:
+
+    - name: Disable Selinux
+      selinux:
+        state: disabled
+
+    - name: Disable Selinux now
+      shell: setenforce 0
+
+    - name: Set up timezone
+      timezone:
+        name: "Europe/Moscow"
+
+    - name: Set up iptables (loopback)
+      iptables:
+        chain: INPUT
+        in_interface: lo
+        jump: ACCEPT
+
+    - name: Allow related and established connections
+      iptables:
+        chain: INPUT
+        ctstate: ESTABLISHED,RELATED
+        jump: ACCEPT
+
+    - name: Set up iptables (ICMP)
+      iptables:
+        chain: INPUT
+        protocol: icmp
+        jump: ACCEPT
+
+    - name: Set up iptabels (TCP)
+      iptables:
+        chain: INPUT
+        protocol: tcp
+        destination_ports:
+          - "22"
+          - "80"
+          - "443"
+          - "389"
+          - "636"
+          - "53"
+          - "88"
+          - "464"
+          - "123"
+        jump: ACCEPT
+
+    - name: Set up iptables (UDP)
+      iptables:
+        chain: INPUT
+        protocol: udp
+        destination_ports:
+          - "53"
+          - "88"
+          - "464"
+          - "123"
+        jump: ACCEPT
+
+    - name:
+      iptables:
+        chain: INPUT
+        policy: DROP
+
+    - name: Install packages
+      yum:
+        name:
+          - nano
+        state: present
+
+    - name: Upgrade OpenSSH
+      yum:
+        name: openssh
+        state: latest
+      when: '"server" in group_names'
+
+    - name: Install FreeIPA server
+      yum:
+        name: ipa-server
+        state: present
+        update_cache: true
+      when: '"server" in group_names'
+
+    - name: Install FreeIPA client
+      yum:
+        name: ipa-client
+        state: present
+        update_cache: true
+      when: '"clients" in group_names'
+
+    - name: Edit hosts file
+      template:
+        src: hosts.j2
+        dest: /etc/hosts
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Configure server
+      shell: echo -e "no\n{{ ipa_server }}\n{{ domain }}\n{{ realm }}\n{{ admin_password }}\n{{ admin_password }}\n{{ admin_password }}\n{{ admin_password }}\n{{ netbios }}\nno\nyes" \
+             | ipa-server-install
+      args:
+        creates: "/etc/ipa/default.conf"
+      when: '"server" in group_names'
+
+    - name: Add clients to ipa
+      shell: echo -e "yes\nyes" | ipa-client-install --mkhomedir --domain={{ realm }} --server={{ ipa_server }} --no-ntp -p {{ admin_account }} -w {{ admin_password }}
+      args:
+        creates: "/etc/ipa/default.conf"
+      when: '"clients" in group_names'
+
+    - name: Check if user exists
+      shell: echo "{{ admin_password }}" | kinit {{ admin_account }}; ipa user-find --login={{ user_account }}
+      failed_when: false
+      changed_when: false
+      register: result
+      when: '"server" in group_names'
+
+    - name: Create user
+      shell: echo "{{ user_password }}" | ipa user-add "{{ user_account }}" --first="{{ user_first }}" --last="{{ user_last }}" --shell="{{ user_shell }}" --sshpubkey="{{ pub_key }}" --password
+      when: '"server" in group_names and "0 users matched" in result.stdout'
+
