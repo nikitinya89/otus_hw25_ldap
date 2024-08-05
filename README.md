@@ -82,16 +82,28 @@ echo "Qwerty123" | ipa user-add "user" --first="Otus" --last="Test" --shell="/bi
 iptables -A INPUT -i lo -j ACCEPT
 iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 iptables -A INPUT -p tcp --dport 22 -j ACCEPT
-iptables -A OUTPUT -p tcp --dport 53 -j ACCEPT
-iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
-iptables -A OUTPUT -p tcp --dport 80 -j ACCEPT
-iptables -A OUTPUT -p tcp --dport 443 -j ACCEPT
-iptables -A OUTPUT -p tcp --dport 389 -j ACCEPT
-iptables -A OUTPUT -p tcp --dport 636 -j ACCEPT
-iptables -A OUTPUT -p tcp --dport 88 -j ACCEPT
-iptables -A OUTPUT -p udp --dport 88 -j ACCEPT
-iptables -A OUTPUT -p tcp --dport 464 -j ACCEPT
-iptables -A OUTPUT -p udp --dport 464 -j ACCEPT
-iptables -A OUTPUT -p tcp --dport 123 -j ACCEPT
-iptables -A OUTPUT -p udp --dport 123 -j ACCEPT
+iptables -A INPUT -p tcp --dport 53 -j ACCEPT
+iptables -A INPUT -p udp --dport 53 -j ACCEPT
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+iptables -A INPUT -p tcp --dport 389 -j ACCEPT
+iptables -A INPUT -p tcp --dport 636 -j ACCEPT
+iptables -A INPUT -p tcp --dport 88 -j ACCEPT
+iptables -A INPUT -p udp --dport 88 -j ACCEPT
+iptables -A INPUT -p tcp --dport 464 -j ACCEPT
+iptables -A INPUT -p udp --dport 464 -j ACCEPT
+iptables -A INPUT -p tcp --dport 123 -j ACCEPT
+iptables -A INPUT -p udp --dport 123 -j ACCEPT
+iptables -P INPUT DROP
+```
+После настройки iptables примет слеюущий вид:
+```bash
+iptables -nvL
+
+
+```
+### Ansible
+Для выполнения задания с помощью ansible необходимо запустить плэйбук:
+```bash
+ansible-playbook ipa.yml
 ```
