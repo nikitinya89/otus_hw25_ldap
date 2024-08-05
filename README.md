@@ -39,11 +39,14 @@ yum install -y ipa-client
 ipa-server-install
 ```
 По завершению установки мы сможем зайти на веб-интерфейс нашего сервера. Для этого необходимо внести соотвествие IP-адреса и имени сервера в локальный файл _hosts_.
-
-
-
+  
+![webui](img/webui.jpg)  
+  
+### Настройка клиентов
 Для конфигурации клиентов необходимо запустить скрипт:
 ```bash
 ipa-client-install --mkhomedir --domain=OTUS.LAN --server=ipa.otus.lan --no-ntp -p admin -w Qwerty123
 ```
-Где **OTUS.LAN** - имя нашего домена, **ipa.otus.lan** - имя LDAP сервера, **admin** - учетная запись LDAP администратора, **Qwerty123** - ее пароль.
+Где **OTUS.LAN** - имя нашего домена, **ipa.otus.lan** - имя LDAP сервера, **admin** - учетная запись LDAP администратора, **Qwerty123** - ее пароль.  
+После этого они появятся в разделе Узлы в падминке сервера:  
+![hosts](img/hosts.jpg)  
