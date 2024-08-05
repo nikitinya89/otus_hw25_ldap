@@ -48,5 +48,22 @@ ipa-server-install
 ipa-client-install --mkhomedir --domain=OTUS.LAN --server=ipa.otus.lan --no-ntp -p admin -w Qwerty123
 ```
 Где **OTUS.LAN** - имя нашего домена, **ipa.otus.lan** - имя LDAP сервера, **admin** - учетная запись LDAP администратора, **Qwerty123** - ее пароль.  
-После этого они появятся в разделе Узлы в падминке сервера:  
+После этого они появятся в разделе Узлы в админке сервера:  
+  
 ![hosts](img/hosts.jpg)  
+  
+### Настройка аутентификации пользователя по SSH-ключам
+Сгенерируем SSH-ключ пользователя командой `ssh-keygen`. Создадим нового пользователя в нашем домене, указав только что созданный публичный ключ:
+```bash
+echo "Qwerty123" | ipa user-add "user" --first="Otus" --last="Test" --shell="/bin/bash" --sshpubkey="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCo4USOCaAsSsaDuQA2kdTLFtIvdxRVHqLGLAMbCqnEtJkrepdizeqgYKKChGVXGeCa+SlbCowHXkqagXk/oISL8gswOYl/bk4WZsXGHOXjPyxNOOt3TWepVF5kU73pZO9zv+ZwoDQCXTqolTA739ie3O1MhgQtzj8i081Q9ZqBEwNO5ZRlLmbNHuDcFV9opTrbqgSVqTC9f+rctaVIZCTFQfNnQ2VFBoB2i2pAwSSVfJUFEYgpAQjw9txTxXO+t5ikf+VbFmzk0Wb8VJF8XWOK/vAzYmj6APwL7t0yQ8fQg1CCMIL9TDkXLN8Fcd8Oqfzl2j1bL/bdyjFb+j0tLOU/P4lptCCLuzmtqLxg/XH4Thc7NidxfcaB6kpaXOXu8Bja/6ZftxjRIDzlm9D7z+kkfRM/58g4UEk3rfbOJW2thmXZlaf1b5bio/d50iYFkEIImmztPHeG6nM6ySge9BQa39JZcYrzpuLPHo5E/hdFwIqLaFpx/91h/swoWWzBnmM= root@ipa.otus.lan" --password
+```
+Созданный нами пользователь появится в админке:  
+  
+![users](img/users.jpg)  
+
+Как мы видим, ему успеншно добавился указанный ранее ключ:
+  
+![user](img/user.jpg)  
+
+После этого можем авторизовываться на сервервах домена по SSH-ключам.  
+### Настройка файерволла
