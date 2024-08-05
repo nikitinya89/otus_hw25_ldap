@@ -96,12 +96,10 @@ iptables -A INPUT -p tcp --dport 123 -j ACCEPT
 iptables -A INPUT -p udp --dport 123 -j ACCEPT
 iptables -P INPUT DROP
 ```
-После настройки iptables примет слеюущий вид:
-```bash
-iptables -nvL
+После настройки iptables примет слеюущий вид:  
 
-
-```
+![iptables](img/iptables.jpg)
+  
 ### Ansible
 Для выполнения задания с помощью ansible необходимо запустить плэйбук:
 ```bash
